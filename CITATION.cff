@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this dataset or the collection toolkit, please cite it as below."
+type: dataset
+title: "LocalNet-Dynamics: A Longitudinal Local Area Network Telemetry Dataset"
+authors:
+  - family-names: "Aiersilan"
+    given-names: "Aizierjiang"
+version: 1.0.0
+url: "https://github.com/Ezharjan/LocalNet-Dynamics"
+repository-code: "https://github.com/Ezharjan/LocalNet-Dynamics"
+license: MIT
+abstract: >-
+  LocalNet-Dynamics is a longitudinal telemetry dataset of a residential/edge
+  local area network, sampled every 30 seconds around the clock from a client
+  machine. Each sample records ICMP latency, jitter and loss to a reference
+  host and to the local gateway, TCP connect time, cached and recursive DNS
+  response time, HTTP time-to-first-response, Wi-Fi link metrics and periodic
+  WAN/LAN throughput tests. The consolidated dataset adds time-of-day features,
+  gap information, rule-based reference labels and manual event annotations
+  for forecasting, anomaly detection and quality-of-service research.
+keywords:
+  - network telemetry
+  - latency
+  - jitter
+  - packet loss
+  - DNS
+  - Wi-Fi
+  - throughput
+  - quality of service
+  - anomaly detection
+  - time series

@@ -1,0 +1,220 @@
+{
+  "run_id": "desktop-eth_20260920_123407",
+  "host_label": "desktop-eth",
+  "collector_version": "2.0.0",
+  "status": "running",
+  "started_utc": "2026-09-20T16:34:18Z",
+  "updated_utc": "2026-10-09T19:45:22Z",
+  "planned_duration_s": 2592000.0,
+  "elapsed_s": 1653039.2,
+  "interval_s": 30.0,
+  "sample_count": 54608,
+  "first_sample_utc": "2026-09-20T16:34:22Z",
+  "last_sample_utc": "2026-10-09T19:45:13Z",
+  "csv_file": "localnet_desktop-eth_20260920_123407.csv",
+  "config": {
+    "target": "8.8.8.8",
+    "ping_count": 10,
+    "gateway_ping_count": 5,
+    "ping_timeout_s": 2.0,
+    "tcp_port": 443,
+    "tcp_count": 5,
+    "dns_host": "example.com",
+    "dns_server": "192.168.1.1",
+    "dns_timeout_s": 3.0,
+    "http_url": "http://www.msftconnecttest.com/connecttest.txt",
+    "http_timeout_s": 5.0,
+    "wifi": true,
+    "record_ssid": false,
+    "speedtest": true,
+    "speedtest_every_s": 3600.0,
+    "speedtest_server_id": null,
+    "iperf_server": null,
+    "iperf_port": 5201,
+    "iperf_every_s": null,
+    "iperf_duration_s": 10,
+    "iperf_reverse": false
+  },
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.12",
+    "machine": "AMD64",
+    "timezone": "Eastern Daylight Time",
+    "utc_offset_s": -14400,
+    "ping_resolution_ms": 1.0
+  },
+  "network": {
+    "gateway_ip": "192.168.1.1",
+    "interface": null,
+    "local_ip": "192.168.1.217",
+    "link_type": "unknown",
+    "link_types_seen": {
+      "unknown": 54608
+    },
+    "detection_source": "route print"
+  },
+  "summary": {
+    "rtt_avg_ms": {
+      "count": 54590,
+      "mean": 12.581,
+      "median": 11.1,
+      "min": 9.3,
+      "max": 288.6,
+      "p95": 22.3,
+      "stddev": 5.217
+    },
+    "rtt_min_ms": {
+      "count": 54590,
+      "mean": 10.432,
+      "median": 10.0,
+      "min": 5.0,
+      "max": 263.0,
+      "p95": 14.0,
+      "stddev": 3.125
+    },
+    "rtt_max_ms": {
+      "count": 54590,
+      "mean": 17.87,
+      "median": 13.0,
+      "min": 10.0,
+      "max": 373.0,
+      "p95": 32.0,
+      "stddev": 10.344
+    },
+    "jitter_ms": {
+      "count": 54590,
+      "mean": 2.306,
+      "median": 1.0,
+      "min": 0.0,
+      "max": 59.778,
+      "p95": 7.667,
+      "stddev": 2.692
+    },
+    "packet_loss_pct": {
+      "count": 54608,
+      "mean": 1.764,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 100.0,
+      "p95": 10.0,
+      "stddev": 5.072
+    },
+    "gateway_rtt_avg_ms": {
+      "count": 54590,
+      "mean": 0.321,
+      "median": 0.2,
+      "min": 0.0,
+      "max": 89.4,
+      "p95": 0.8,
+      "stddev": 1.319
+    },
+    "gateway_packet_loss_pct": {
+      "count": 54608,
+      "mean": 0.033,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 100.0,
+      "p95": 0.0,
+      "stddev": 1.817
+    },
+    "tcp_connect_median_ms": {
+      "count": 54589,
+      "mean": 19.311,
+      "median": 14.483,
+      "min": 11.262,
+      "max": 1524.463,
+      "p95": 32.127,
+      "stddev": 18.435
+    },
+    "dns_resolve_ms": {
+      "count": 54586,
+      "mean": 43.595,
+      "median": 36.025,
+      "min": 3.743,
+      "max": 3252.214,
+      "p95": 74.864,
+      "stddev": 70.374
+    },
+    "dns_recursive_ms": {
+      "count": 54581,
+      "mean": 87.278,
+      "median": 59.238,
+      "min": 16.657,
+      "max": 25645.041,
+      "p95": 106.313,
+      "stddev": 230.545
+    },
+    "http_ms": {
+      "count": 54556,
+      "mean": 154.754,
+      "median": 81.91,
+      "min": 23.451,
+      "max": 13111.02,
+      "p95": 271.398,
+      "stddev": 403.142
+    },
+    "wifi_signal_pct": {
+      "count": 4,
+      "mean": 85.75,
+      "median": 85.0,
+      "min": 84.0,
+      "max": 89.0,
+      "p95": 89.0,
+      "stddev": 1.92
+    },
+    "wifi_rssi_dbm": {
+      "count": 4,
+      "mean": -57.125,
+      "median": -57.5,
+      "min": -58.0,
+      "max": -55.5,
+      "p95": -55.5,
+      "stddev": 0.96
+    },
+    "wifi_rx_mbps": {
+      "count": 4,
+      "mean": 866.7,
+      "median": 866.7,
+      "min": 866.7,
+      "max": 866.7,
+      "p95": 866.7,
+      "stddev": 0.0
+    },
+    "download_mbps": {
+      "count": 460,
+      "mean": 68.463,
+      "median": 34.725,
+      "min": 0.0,
+      "max": 480.72,
+      "p95": 319.51,
+      "stddev": 93.847
+    },
+    "upload_mbps": {
+      "count": 460,
+      "mean": 26.121,
+      "median": 28.625,
+      "min": 0.0,
+      "max": 54.17,
+      "p95": 41.17,
+      "stddev": 12.608
+    },
+    "speedtest_ping_ms": {
+      "count": 460,
+      "mean": 306603.157,
+      "median": 78.725,
+      "min": 16.672,
+      "max": 1800000.0,
+      "p95": 1800000.0,
+      "stddev": 674249.533
+    },
+    "sample_duration_s": {
+      "count": 54608,
+      "mean": 9.789,
+      "median": 9.21,
+      "min": 9.06,
+      "max": 114.85,
+      "p95": 11.23,
+      "stddev": 2.964
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # The collector (scripts/collect_data.py) needs only the Python standard library.
-# These packages are used by the build, analysis and test scripts, and by the
-# speed-test fallback when the Ookla CLI is not installed.
+# These packages are used by the build, analysis, plotting, packaging and test
+# scripts, and by the speed-test fallback when the Ookla CLI is not installed.
 pandas>=1.5
 numpy>=1.21
 pyarrow>=12.0

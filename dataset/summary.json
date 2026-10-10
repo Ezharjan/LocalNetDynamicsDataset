@@ -1,0 +1,231 @@
+{
+  "generated_utc": "2026-10-10T05:42:01Z",
+  "builder_version": "2.0.1",
+  "rows": 54617,
+  "columns": 67,
+  "runs": [
+    {
+      "run_id": "desktop-eth_20260920_123407",
+      "host_label": "desktop-eth",
+      "rows": 54617,
+      "first_utc": "2026-09-20T16:34:22Z",
+      "last_utc": "2026-10-09T19:49:43Z",
+      "span_hours": 459.26,
+      "interval_s": 30.0,
+      "coverage_pct": 99.1,
+      "link_types": {
+        "unknown": 54617
+      },
+      "collector_version": "2.0.0",
+      "os": "Windows-11-10.0.26200-SP0",
+      "status": "running",
+      "thresholds": {
+        "rtt_avg_ms": {
+          "n": 54599,
+          "median": 11.1,
+          "mad": 0.678,
+          "threshold": 21.1
+        },
+        "jitter_ms": {
+          "n": 54599,
+          "median": 1.0,
+          "mad": 0.556,
+          "threshold": 6.0
+        },
+        "gateway_rtt_avg_ms": {
+          "n": 54599,
+          "median": 0.2,
+          "mad": 0.2,
+          "threshold": 5.2
+        }
+      }
+    }
+  ],
+  "first_utc": "2026-09-20T16:34:22Z",
+  "last_utc": "2026-10-09T19:49:43Z",
+  "span_days": 19.14,
+  "coverage_pct": 99.1,
+  "label_rule": {
+    "mad_k": 5.0,
+    "description": "threshold = median + max(k * 1.4826 * MAD, absolute floor, relative floor * median), computed per run",
+    "floors": {
+      "rtt_avg_ms": {
+        "absolute_ms": 10.0,
+        "relative": 0.5
+      },
+      "jitter_ms": {
+        "absolute_ms": 5.0,
+        "relative": 1.0
+      },
+      "gateway_rtt_avg_ms": {
+        "absolute_ms": 5.0,
+        "relative": 1.0
+      }
+    }
+  },
+  "labels": {
+    "label_outage": {
+      "rows": 18,
+      "share_pct": 0.033
+    },
+    "label_packet_loss": {
+      "rows": 7692,
+      "share_pct": 14.084
+    },
+    "label_high_latency": {
+      "rows": 3067,
+      "share_pct": 5.615
+    },
+    "label_high_jitter": {
+      "rows": 5074,
+      "share_pct": 9.29
+    },
+    "label_gateway_degraded": {
+      "rows": 560,
+      "share_pct": 1.025
+    },
+    "label_anomaly": {
+      "rows": 13036,
+      "share_pct": 23.868
+    }
+  },
+  "events": 0,
+  "metrics": {
+    "rtt_avg_ms": {
+      "count": 54599,
+      "mean": 12.581,
+      "median": 11.1,
+      "p95": 22.3,
+      "min": 9.3,
+      "max": 288.6
+    },
+    "rtt_min_ms": {
+      "count": 54599,
+      "mean": 10.432,
+      "median": 10.0,
+      "p95": 14.0,
+      "min": 5.0,
+      "max": 263.0
+    },
+    "rtt_max_ms": {
+      "count": 54599,
+      "mean": 17.869,
+      "median": 13.0,
+      "p95": 32.0,
+      "min": 10.0,
+      "max": 373.0
+    },
+    "jitter_ms": {
+      "count": 54599,
+      "mean": 2.306,
+      "median": 1.0,
+      "p95": 7.667,
+      "min": 0.0,
+      "max": 59.778
+    },
+    "packet_loss_pct": {
+      "count": 54617,
+      "mean": 1.763,
+      "median": 0.0,
+      "p95": 10.0,
+      "min": 0.0,
+      "max": 100.0
+    },
+    "gateway_rtt_avg_ms": {
+      "count": 54599,
+      "mean": 0.321,
+      "median": 0.2,
+      "p95": 0.8,
+      "min": 0.0,
+      "max": 89.4
+    },
+    "gateway_packet_loss_pct": {
+      "count": 54617,
+      "mean": 0.033,
+      "median": 0.0,
+      "p95": 0.0,
+      "min": 0.0,
+      "max": 100.0
+    },
+    "tcp_connect_median_ms": {
+      "count": 54598,
+      "mean": 19.311,
+      "median": 14.484,
+      "p95": 32.127,
+      "min": 11.262,
+      "max": 1524.463
+    },
+    "dns_resolve_ms": {
+      "count": 54595,
+      "mean": 43.594,
+      "median": 36.026,
+      "p95": 74.878,
+      "min": 3.743,
+      "max": 3252.214
+    },
+    "dns_recursive_ms": {
+      "count": 54590,
+      "mean": 87.275,
+      "median": 59.242,
+      "p95": 106.31,
+      "min": 16.657,
+      "max": 25645.041
+    },
+    "http_ms": {
+      "count": 54565,
+      "mean": 154.745,
+      "median": 81.911,
+      "p95": 271.36,
+      "min": 23.451,
+      "max": 13111.02
+    },
+    "wifi_signal_pct": {
+      "count": 4,
+      "mean": 85.75,
+      "median": 85.0,
+      "p95": 88.4,
+      "min": 84.0,
+      "max": 89.0
+    },
+    "wifi_rssi_dbm": {
+      "count": 4,
+      "mean": -57.125,
+      "median": -57.5,
+      "p95": -55.8,
+      "min": -58.0,
+      "max": -55.5
+    },
+    "wifi_rx_mbps": {
+      "count": 4,
+      "mean": 866.7,
+      "median": 866.7,
+      "p95": 866.7,
+      "min": 866.7,
+      "max": 866.7
+    },
+    "download_mbps": {
+      "count": 460,
+      "mean": 68.463,
+      "median": 34.725,
+      "p95": 318.275,
+      "min": 0.0,
+      "max": 480.72
+    },
+    "upload_mbps": {
+      "count": 460,
+      "mean": 26.121,
+      "median": 28.625,
+      "p95": 41.142,
+      "min": 0.0,
+      "max": 54.17
+    },
+    "speedtest_ping_ms": {
+      "count": 381,
+      "mean": 93.665,
+      "median": 52.058,
+      "p95": 196.381,
+      "min": 16.672,
+      "max": 1167.189
+    }
+  }
+}

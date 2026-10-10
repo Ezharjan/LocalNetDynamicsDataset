@@ -451,6 +451,45 @@ def test_parse_ookla_json():
     assert r["speedtest_server_id"] == 1234 and r["speedtest_server"] == "Example ISP, Springfield"
 
 
+class _FakeResults:
+    ping = 1800000.0
+    server = {"id": 42, "sponsor": "Example ISP", "name": "Springfield"}
+
+
+class _FakeSpeedtest:
+    def __init__(self, secure=True):
+        self.results = _FakeResults()
+
+    def get_servers(self, ids):
+        pass
+
+    def get_best_server(self):
+        pass
+
+    def download(self):
+        return 120e6
+
+    def upload(self, pre_allocate=False):
+        return 20e6
+
+
+def test_speedtest_cli_failed_latency_probe(monkeypatch):
+    import sys
+    import types
+    module = types.ModuleType("speedtest")
+    module.Speedtest = _FakeSpeedtest
+    monkeypatch.setitem(sys.modules, "speedtest", module)
+    monkeypatch.setattr(cd, "_ookla_cli_path", lambda: None)
+    out = cd.run_speedtest()
+    assert out["download_mbps"] == 120.0 and out["upload_mbps"] == 20.0
+    assert "speedtest_ping_ms" not in out
+    assert out["error"] == "speedtest-cli: server latency probe failed"
+    assert out["speedtest_server"] == "Example ISP, Springfield"
+    _FakeResults.ping = 23.4
+    out = cd.run_speedtest()
+    assert out["speedtest_ping_ms"] == 23.4 and "error" not in out
+
+
 def test_iperf_json_parsing(monkeypatch):
     payload = {"end": {"sum_sent": {"bits_per_second": 9.4e8, "retransmits": 12},
                        "sum_received": {"bits_per_second": 9.38e8}}}

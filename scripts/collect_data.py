@@ -56,7 +56,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-COLLECTOR_VERSION = "2.0.0"
+COLLECTOR_VERSION = "2.0.1"
 
 IS_WINDOWS = sys.platform.startswith("win")
 IS_MACOS = sys.platform == "darwin"
@@ -64,6 +64,7 @@ IS_LINUX = sys.platform.startswith("linux")
 
 ROUTE_REFRESH_S = 900.0          # re-detect gateway / link type every 15 min
 META_REFRESH_S = 300.0           # rewrite the run metadata JSON every 5 min
+SPEEDTEST_PING_FAILED_MS = 600_000.0   # speedtest-cli scores a failed latency attempt as 3600 s
 USER_AGENT = f"LocalNet-Dynamics/{COLLECTOR_VERSION}"
 
 
@@ -962,8 +963,10 @@ def run_speedtest(server_id: Optional[int] = None, timeout_s: float = 180.0) -> 
         up = st.upload(pre_allocate=False) / 1e6
         res = st.results
         out = {"download_mbps": round(down, 2), "upload_mbps": round(up, 2)}
-        if res.ping is not None:
+        if res.ping is not None and float(res.ping) < SPEEDTEST_PING_FAILED_MS:
             out["speedtest_ping_ms"] = round(float(res.ping), 3)
+        elif res.ping is not None:
+            out["error"] = "speedtest-cli: server latency probe failed"
         server = res.server or {}
         if server.get("id"):
             out["speedtest_server_id"] = int(server["id"])

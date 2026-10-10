@@ -1,4 +1,4 @@
-"""End-to-end tests for build_dataset.py, annotate.py and analyze.py.
+"""End-to-end tests for build_dataset.py, annotate.py, analyze.py and plot_figures.py.
 
 A small raw run is synthesised in a temporary directory with the collector's
 own schema so that the build pipeline, label rules, event join and figure
@@ -71,7 +71,7 @@ def write_synthetic_run(raw_dir: Path, run_id: str = "testhost_20260906_180000")
         s.wifi_channel, s.wifi_band_ghz, s.wifi_phy = 36, 5.0, "802.11ax"
         if i % 30 == 0:
             s.download_mbps, s.upload_mbps = round(rng.gauss(450, 30), 2), round(rng.gauss(22, 2), 2)
-            s.speedtest_ping_ms = 9.5
+            s.speedtest_ping_ms = 1800000.0 if i == 60 else 9.5     # one failed latency probe
             s.speedtest_server_id, s.speedtest_server = 1234, "Example ISP, Springfield"
         s.sample_duration_s = 10.4
         s.notes = "ping: no replies" if not rtts else ""
@@ -146,6 +146,15 @@ def test_reference_labels(built):
     assert summary["labels"]["label_outage"]["rows"] == 3
 
 
+def test_failed_speedtest_latency_is_missing(built):
+    _, df, summary, _ = built
+    tests = df[df["download_mbps"].notna()]
+    assert len(tests) == 36
+    assert tests["speedtest_ping_ms"].isna().sum() == 1
+    assert tests.loc[tests["sample_index"] == 60, "speedtest_ping_ms"].isna().all()
+    assert summary["metrics"]["speedtest_ping_ms"]["max"] == 9.5
+
+
 def test_event_join(built):
     _, df, summary, _ = built
     tagged = df[df["event_category"].fillna("") != ""]
@@ -169,15 +178,30 @@ def test_size_category():
     assert bd.size_category(2_000_000) == "1M<n<10M"
 
 
-def test_analyze_figures(built, tmp_path):
-    pytest.importorskip("matplotlib")
+def test_analysis_json(built):
     import analyze
+    root, df, summary, _ = built
+    analyze.main(["--input", str(root / "localnet_dynamics.csv"), "--no-report"])
+    a = json.loads((root / "analysis.json").read_text(encoding="utf-8"))
+    assert a["overview"]["rows"] == len(df)
+    assert len(a["hour_profile"]) == 18 and len(a["daily"]) == 2
+    assert len(a["outages"]) == 1 and a["outages"][0]["samples"] == 3
+    assert a["regimes"]["before"]["n"] + a["regimes"]["after"]["n"] == len(df)
+    assert a["speedtest"]["tests"] == 36 and a["speedtest"]["failed_latency_probe"] == 1
+    assert a["labels"]["counts"]["label_outage"] == 3
+    assert set(a["autocorrelation"]["values"]) >= {"log_rtt_avg_ms", "loss_indicator", "http_ms"}
+
+
+def test_figures(built, tmp_path):
+    pytest.importorskip("matplotlib")
+    import plot_figures
     root, _, _, _ = built
     out = tmp_path / "figures"
-    analyze.main(["--input", str(root / "localnet_dynamics.csv"), "--out-dir", str(out)])
-    for name in ("rtt_timeline.png", "diurnal_profile.png", "diurnal_heatmap.png",
-                 "distributions.png", "throughput.png", "wifi_signal_vs_rtt.png"):
-        assert (out / name).stat().st_size > 10_000, name
+    plot_figures.main(["--input", str(root / "localnet_dynamics.csv"), "--out-dir", str(out)])
+    for name in ("overview_timeline", "diurnal_profile", "calendar_heatmaps", "tcp_vs_icmp",
+                 "loss_anatomy", "regimes", "autocorrelation", "speedtest", "labels"):
+        assert (out / "png" / f"{name}.png").stat().st_size > 10_000, name
+        assert (out / "pdf" / f"{name}.pdf").stat().st_size > 1_000, name
 
 
 def test_annotate_parses_local_and_utc_times():

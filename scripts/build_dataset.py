@@ -3,9 +3,10 @@
 Consolidate raw collector runs into the published LocalNet-Dynamics dataset.
 
 Reads every `localnet_*.csv` (and its `.json` run metadata) from the raw
-directory, validates and merges them, adds time-of-day features, gap
-information, rule-based reference labels and manual event annotations, and
-writes:
+directory, validates and merges them (malformed timestamps, duplicates, loss
+percentages outside 0-100 and failed speed-test latency probes are handled),
+adds time-of-day features, gap information, rule-based reference labels and
+manual event annotations, and writes:
 
     dataset/localnet_dynamics.csv       consolidated dataset
     dataset/localnet_dynamics.parquet   same content (needs pyarrow)
@@ -61,6 +62,10 @@ STATS_COLUMNS = [
     "wifi_rx_mbps", "download_mbps", "upload_mbps", "speedtest_ping_ms",
     "download_loaded_latency_ms", "upload_loaded_latency_ms", "lan_throughput_mbps",
 ]
+
+# speedtest-cli scores a failed latency attempt as 3600 s and averages three attempts
+# over six, so one failed attempt already yields a value of at least 600,000 ms.
+SPEEDTEST_PING_FAILED_MS = 600_000
 
 CARD_BEGIN = "<!-- BEGIN GENERATED STATISTICS -->"
 CARD_END = "<!-- END GENERATED STATISTICS -->"
@@ -143,6 +148,11 @@ def validate(df: pd.DataFrame) -> pd.DataFrame:
         if bad.any():
             print(f"warning: {int(bad.sum())} rows have {col} outside 0-100; set to missing")
             df.loc[bad, col] = np.nan
+    failed = df["speedtest_ping_ms"] >= SPEEDTEST_PING_FAILED_MS
+    if failed.any():
+        print(f"{int(failed.sum())} speed-test rows have a failed server latency probe "
+              f"(speedtest_ping_ms >= {SPEEDTEST_PING_FAILED_MS:,}); set to missing")
+        df.loc[failed, "speedtest_ping_ms"] = np.nan
     return df
 
 

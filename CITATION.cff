@@ -1,31 +1,40 @@
 cff-version: 1.2.0
-message: "If you use this dataset or the collection toolkit, please cite it as below."
-type: dataset
-title: "LocalNet-Dynamics: A Longitudinal Local Area Network Telemetry Dataset"
+message: "If you use this software, please cite it as below. The dataset built with it has its own citation; see README.md."
+type: software
+title: "LocalNet-Dynamics: collector, build pipeline and analysis toolkit for longitudinal home-network telemetry"
 authors:
-  - family-names: "Aiersilan"
-    given-names: "Aizierjiang"
+  - family-names: "Ezharjan"
+    given-names: "Alexander"
 version: 1.0.0
-url: "https://github.com/Ezharjan/LocalNet-Dynamics"
-repository-code: "https://github.com/Ezharjan/LocalNet-Dynamics"
+date-released: "2026-10-09"
 license: MIT
+url: "https://github.com/Ezharjan/LocalNetDynamicsDataset"
+repository-code: "https://github.com/Ezharjan/LocalNetDynamicsDataset"
 abstract: >-
-  LocalNet-Dynamics is a longitudinal telemetry dataset of a residential/edge
-  local area network, sampled every 30 seconds around the clock from a client
-  machine. Each sample records ICMP latency, jitter and loss to a reference
-  host and to the local gateway, TCP connect time, cached and recursive DNS
-  response time, HTTP time-to-first-response, Wi-Fi link metrics and periodic
-  WAN/LAN throughput tests. The consolidated dataset adds time-of-day features,
-  gap information, rule-based reference labels and manual event annotations
-  for forecasting, anomaly detection and quality-of-service research.
+  A Python toolkit that samples a local network every 30 seconds from a client
+  machine (ICMP latency, jitter and loss to a reference host and to the
+  gateway, TCP connect time, cached and recursive DNS response time, HTTP
+  time-to-first-response, Wi-Fi link metrics and periodic WAN/LAN throughput
+  tests), consolidates the raw runs into a labelled dataset, and produces the
+  statistics and figures that document it.
 keywords:
   - network telemetry
+  - network measurement
   - latency
   - jitter
   - packet loss
   - DNS
-  - Wi-Fi
   - throughput
   - quality of service
   - anomaly detection
   - time series
+references:
+  - type: dataset
+    title: "LocalNet-Dynamics: A Longitudinal Local Area Network Telemetry Dataset"
+    authors:
+      - family-names: "Ezharjan"
+        given-names: "Alexander"
+    year: 2026
+    version: 1.0.0
+    doi: 10.57967/hf/10841
+    url: "https://huggingface.co/datasets/ezharjan/LocalNetDynamics"

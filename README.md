@@ -1,19 +1,145 @@
 # LocalNet-Dynamics
 
-A longitudinal telemetry dataset of a real residential/edge network, and the
+A longitudinal telemetry dataset of a real residential network, and the
 toolkit that produces it.
 
-A single client machine samples its network every 30 seconds around the clock
-for weeks: ICMP latency and loss to a reference host and to the local gateway,
-TCP connect time, DNS response time (cached and fully recursive), HTTP
-time-to-first-response, Wi-Fi link quality, and periodic WAN/LAN throughput
-tests. The consolidated dataset adds time-of-day features, gap information,
-rule-based reference labels for outages and degradations, and manual event
-annotations, so it can be used directly for time-series forecasting, anomaly
-detection, QoS classification and diurnal-pattern studies.
+One wired desktop sampled its network every 30 seconds, around the clock, for
+19 days (2026-09-20 to 2026-10-09, US Eastern time): ICMP latency, jitter and
+loss to a reference host and to the local gateway, TCP connect time, DNS
+response time for a resolver-cached and for a never-seen name, HTTP
+time-to-first-response, and an hourly WAN speed test. The result is 54,617
+samples at 99.1 % coverage, consolidated into one table with time-of-day
+features, rule-based reference labels and a documented build pipeline.
 
-Author: Aizierjiang Aiersilan. License: MIT (code and data).
-Dataset documentation, schema and statistics: [DATASET_CARD.md](DATASET_CARD.md).
+| | |
+|---|---|
+| Author | Alexander Ezharjan |
+| Dataset card | [DATASET_CARD.md](DATASET_CARD.md) (schema, protocol, statistics, limitations) |
+| Hugging Face | [huggingface.co/datasets/ezharjan/LocalNetDynamics](https://huggingface.co/datasets/ezharjan/LocalNetDynamics) |
+| DOI | [10.57967/hf/10841](https://doi.org/10.57967/hf/10841) |
+| Source code | [github.com/Ezharjan/LocalNetDynamicsDataset](https://github.com/Ezharjan/LocalNetDynamicsDataset) |
+| License | MIT (code and data) |
+
+## What the data shows
+
+Every number below is computed by `scripts/analyze.py` and stored in
+[`dataset/analysis.json`](dataset/analysis.json); every figure is rendered by
+`scripts/plot_figures.py` as PNG and PDF under `figures/`.
+
+### The whole capture at a glance
+
+![Overview timeline](figures/png/overview_timeline.png)
+
+The 19 days split into two very different halves. A single change point in
+the daily share of samples with ICMP loss falls on 2026-09-30: before it,
+23.2 % of samples lost at least one of their ten echoes, the 95th percentile
+of the round-trip time was 24.3 ms and 38.9 % of samples carried an anomaly
+label; from September 30 on, those figures are 5.3 %, 14.2 ms and 9.2 %. The
+four outages (red lines) each lasted 2 to 2.5 minutes and took the gateway down
+with the target, so all of them were first-hop events, not ISP events. The
+shaded bands are the long high-latency episodes, classified below.
+
+### Loss has a business-hours clock, the latency tail has a night-time one
+
+![Diurnal profile](figures/png/diurnal_profile.png)
+
+On weekdays the share of samples with a lost echo climbs from about 6 % at
+night to 25 % at 08:00 and stays above 20 % until 16:00; on weekends it never
+shows that peak. The latency tail runs the other way: the 95th percentile of
+the round-trip time sits between 14 and 20 ms from 08:00 to 21:00 and between
+24 and 27 ms from 22:00 to 06:00, because the six path-change episodes
+described below all fall between 21:21 and 07:34.
+
+![Calendar heat maps](figures/png/calendar_heatmaps.png)
+
+Day by hour, the daytime loss is a weekday phenomenon of the first ten days,
+the overnight latency plateaus are four distinct nights, and the slow HTTP
+responses track the loss, not the latency.
+
+### Two anatomies of degradation
+
+![Degradation anatomy](figures/png/degradation_anatomy.png)
+
+Nine high-latency episodes last 30 minutes or more and contain 88.4 % of all
+high-latency labels. Six of them are path changes: the latency *floor* moved.
+The fastest of five TCP handshakes rises from its 12.3 ms baseline to between
+19.5 and 25.7 ms in all six, and in the three longest the minimum ICMP time
+rises with it from 10 to 17-20 ms; the gateway stays at 0 ms and the DNS
+probe, whose queries the gateway forwards to the upstream resolver, barely
+moves (36 to 40 ms against a 35 to 37 ms baseline), which places the extra 7
+to 13 ms on the route towards 8.8.8.8, beyond the first hop and beyond the
+point where the resolver path branches off. The longest one ran from 21:21 on September
+29 to 07:34 the next morning. The other three episodes, all on the afternoon of
+Saturday September 26, are a first-hop event: the gateway itself answered in
+10 to 11 ms instead of 0.2 ms, from 14:07 to 18:17 with shorter bursts from
+10:19 on, and every other probe inherited the delay. That day holds 507 of the
+560 gateway-degraded labels.
+
+### What ping cannot see
+
+![TCP versus ICMP](figures/png/tcp_vs_icmp.png)
+
+From 22:00 on October 6 the fastest of five TCP handshakes to port 443 of
+8.8.8.8 became bimodal, 12.9 ms at the first quartile and 22.2 ms at the
+third, while ICMP echoes to the same address kept their 10 ms floor. The share
+of samples in which TCP sits more than 5 ms above ICMP went from 7.2 % to
+63.7 %. A split of that kind, which is what per-flow load balancing produces,
+is invisible to a pure ping monitor; the dataset carries both probes so that
+it is not invisible here.
+
+### What a lost echo means
+
+![Loss anatomy](figures/png/loss_anatomy.png)
+
+Loss arrives one echo at a time: 6,309 samples lost exactly one of ten, 1,092
+lost two, 230 lost three. In samples with one lost echo the median jitter
+doubles (1.0 to 2.1 ms), HTTP responses slower than one second become three
+times as frequent (2.5 % to 7.5 %) and recursive DNS lookups slower than
+200 ms likewise (1.8 % to 5.2 %), while the median TCP handshake does not move
+(14.5 to 14.3 ms). The HTTP distribution is not a smooth tail: beyond its
+82 ms body it has discrete modes near 1.1 s, 1.3 s and 4.1 s, whose timing
+matches the retransmission timers of the operating system's resolver and TCP
+stack waiting out a lost packet.
+
+### Before and after the change point
+
+![Regimes](figures/png/regimes.png)
+
+The empirical distribution of every probe for September 20 to 29 against
+September 30 to October 9. Latency, jitter and HTTP tighten markedly; the TCP
+handshake is the one probe whose later distribution gains a second mode, from
+the October 6 split.
+
+### How long the network remembers
+
+![Autocorrelation](figures/png/autocorrelation.png)
+
+The log round-trip time has a lag-1 autocorrelation of 0.81, still 0.68 after
+30 minutes and 0.42 after three hours, but only 0.09 at a one-day lag: this
+site has persistence, not a daily cycle. Jitter keeps 0.17 of its correlation
+at a one-day lag. The loss indicator is weakly persistent (0.18 at
+lag 1; a sample following a lossy sample is lossy with probability 0.30 against
+a base rate of 0.14). DNS and HTTP timings are memoryless at every lag.
+
+### WAN throughput is a server lottery
+
+![Speed tests](figures/png/speedtest.png)
+
+The 460 hourly speed tests ran through the `speedtest-cli` fallback with no
+pinned server and landed on 162 different servers; 79 of them could not even
+measure the server's latency, and seven reported a download of 0 Mbit/s. Among the ten most
+used servers the median download ranges from 21 to 372 Mbit/s, so the download
+column says more about the server than about the access link. Upload is far more stable: median
+28.6 Mbit/s, 90th percentile 40.3 Mbit/s. Treat the throughput columns as a
+lower bound and read the dataset card before using them.
+
+### Reference labels
+
+![Labels](figures/png/labels.png)
+
+23.9 % of samples carry at least one label; 10,205 carry exactly one and 2,831
+two or more. The high-jitter label is the one that changes most between the
+two halves (17.2 % to 1.5 %).
 
 ## What is measured
 
@@ -31,26 +157,37 @@ Every sample is one row. All latency values are in milliseconds.
 | LAN throughput | `lan_throughput_mbps`, `lan_retransmits` | `iperf3` against a server on the LAN, own cadence |
 | Context | `run_id`, `host_label`, `sample_index`, `timestamp_utc`, `timestamp_local`, `epoch_s`, `elapsed_s`, `link_type`, `gateway_ip`, `target`, `sample_duration_s`, `notes` | Identity, time (UTC and local with offset), wired/wireless link type, probe errors |
 
+The builder adds run context, time features, gap information, six reference
+labels and manual event annotations; the dataset card lists every column.
+
 ## Repository layout
 
 ```text
-LocalNet-Dynamics/
+LocalNetDynamicsDataset/
 ├── README.md                 this file
-├── DATASET_CARD.md           dataset card: schema, label rules, protocol, limitations, statistics
-├── CITATION.cff              citation metadata
+├── DATASET_CARD.md           dataset card: schema, label rules, protocol, findings, statistics
+├── HUGGINGFACE_UPLOAD.md     step-by-step guide for publishing the huggingface/ folder
+├── CITATION.cff              citation metadata for the source code
 ├── LICENSE                   MIT
-├── requirements.txt          optional Python dependencies (build, analysis, tests, speedtest fallback)
+├── requirements.txt          Python dependencies for building, analysing and testing
 ├── scripts/
 │   ├── collect_data.py       collector (standard library only)
 │   ├── build_dataset.py      merges raw runs, adds features, labels and events, refreshes the card
 │   ├── annotate.py           records manual event annotations
-│   └── analyze.py            text report and figures
-├── tests/                    pytest suite (parsers for every supported platform, build pipeline)
-└── dataset/
-    ├── raw/                  one CSV + JSON per collection run, events.csv
-    ├── localnet_dynamics.csv     consolidated dataset (built)
-    ├── localnet_dynamics.parquet consolidated dataset, same content (built)
-    └── summary.json              statistics and per-run label thresholds (built)
+│   ├── analyze.py            statistics, episodes and findings -> dataset/analysis.json
+│   ├── plot_figures.py       figures -> figures/png and figures/pdf
+│   └── package_huggingface.py assembles the huggingface/ folder from the files above
+├── tests/                    pytest suite (parsers for every supported platform, build, analysis, figures)
+├── dataset/
+│   ├── raw/                  one CSV + JSON per collection run, exactly as written by the collector
+│   ├── localnet_dynamics.csv     consolidated dataset (built)
+│   ├── localnet_dynamics.parquet consolidated dataset, same content (built)
+│   ├── summary.json              statistics and per-run label thresholds (built)
+│   └── analysis.json             findings quoted in the documentation (built)
+├── figures/
+│   ├── png/                  figures at 200 dpi
+│   └── pdf/                  the same figures as vector PDF
+└── huggingface/              self-contained copy for Hugging Face (generated, not tracked by git)
 ```
 
 ## Requirements
@@ -59,11 +196,11 @@ LocalNet-Dynamics/
   operating system's `ping`.
 - Optional, for WAN throughput: the [Ookla Speedtest CLI](https://www.speedtest.net/apps/cli)
   (`speedtest` on the PATH, preferred; provides loaded latency) or
-  `pip install speedtest-cli` (fallback).
+  `pip install speedtest-cli` (fallback, see the limitations in the card).
 - Optional, for LAN throughput: `iperf3` on the collector and `iperf3 -s` on
   another LAN host.
-- Optional, for building and analysing: `pip install -r requirements.txt`
-  (pandas, pyarrow, matplotlib, pytest).
+- For building, analysing, plotting and testing: `pip install -r requirements.txt`
+  (pandas, numpy, pyarrow, matplotlib, pytest).
 
 ## Quick start
 
@@ -86,18 +223,20 @@ immediately; a run can be stopped at any time with Ctrl-C and the files remain
 valid. The run metadata (`dataset/raw/localnet_<run_id>.json`) is refreshed every
 five minutes and finalised when the run ends.
 
-When enough data has been collected, build the consolidated dataset and the
-figures:
+When enough data has been collected, build the consolidated dataset, run the
+analysis, render the figures and assemble the Hugging Face folder:
 
 ```bash
 python scripts/build_dataset.py
 python scripts/analyze.py
+python scripts/plot_figures.py
+python scripts/package_huggingface.py
 ```
 
 ## Collection protocol
 
 The value of the dataset comes from uninterrupted, regularly spaced samples
-over many diurnal cycles. The published runs follow the protocol below, which
+over many diurnal cycles. The published run follows the protocol below, which
 is also the recommended setup for new vantage points.
 
 - Interval 30 s (2,880 samples per day, 86,400 per 30 days). The latency
@@ -116,8 +255,9 @@ is also the recommended setup for new vantage points.
   router reboots, ISP maintenance) as they happen with `annotate.py`. They
   become the `event_category` and `event_description` columns.
 - Pin the speed-test server (`--speedtest-server <id>`, see
-  `speedtest --servers` or `speedtest-cli --list`) so that throughput numbers
-  are comparable across the run.
+  `speedtest --servers` or `speedtest-cli --list`) and prefer the official
+  Ookla CLI. The published run did neither, and its throughput columns show
+  the cost: see the findings above.
 - For a paired wired/wireless view, run a second collector on another machine
   on the same network with a different `--host-label`; the builder keeps runs
   apart by `run_id` and computes label thresholds per run.
@@ -187,9 +327,19 @@ and `.parquet`, adds:
   `label_gateway_degraded`, `label_anomaly`;
 - manual annotations: `event_category`, `event_description`;
 
-writes `dataset/summary.json` (row counts, coverage, per-metric statistics,
-per-run label thresholds) and refreshes the statistics section of
-`DATASET_CARD.md`. The label rules are specified in the dataset card.
+sets the speed-test latency to missing where the `speedtest-cli` fallback
+recorded a failed probe (a value of 600,000 ms or more), writes
+`dataset/summary.json` (row counts, coverage, per-metric statistics, per-run
+label thresholds) and refreshes the statistics section of `DATASET_CARD.md`.
+The label rules are specified in the dataset card.
+
+`scripts/analyze.py` writes `dataset/analysis.json`: overall statistics,
+hour-of-day and day-by-day profiles, the change point between the two regimes,
+outage and high-latency episodes with their diagnosis, the conditional effect
+of ICMP loss on the other probes, the TCP/ICMP split, DNS and HTTP facts,
+autocorrelation, speed-test quality and label statistics. It also prints a
+text report. `scripts/plot_figures.py` renders the ten figures from the same
+numbers, each as a 200 dpi PNG and as a vector PDF cropped to the drawn area.
 
 ## Annotating events
 
@@ -202,28 +352,26 @@ python scripts/annotate.py --list
 
 Categories: `load`, `outage`, `maintenance`, `environment`, `isp`, `device`,
 `other`. Times without an offset are interpreted as local time; the file
-`dataset/raw/events.csv` stores UTC.
+`dataset/raw/events.csv` stores UTC. No events were recorded during the
+published run.
 
-## Analysis
-
-```bash
-python scripts/analyze.py                # text report + figures/*.png
-python scripts/analyze.py --no-figures   # text report only
-```
-
-The report prints overall and hour-of-day statistics and the label counts; the
-figures cover the latency timeline, the diurnal profile, a day-by-hour heat
-map, metric distributions, speed-test results and Wi-Fi signal against
-latency.
-
-Loading the dataset in Python:
+## Loading the dataset
 
 ```python
 import pandas as pd
-df = pd.read_csv("dataset/localnet_dynamics.csv", parse_dates=["timestamp_utc"])
+
+df = pd.read_parquet("dataset/localnet_dynamics.parquet")
 evening = df[df.hour_local.between(19, 22)]
 print(evening.rtt_avg_ms.describe())
 print(df.groupby("hour_local").packet_loss_pct.apply(lambda s: (s > 0).mean()))
+```
+
+From the Hugging Face Hub:
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("ezharjan/LocalNetDynamics", split="train")
 ```
 
 ## Tests
@@ -236,9 +384,9 @@ python -m pytest tests
 The suite covers the `ping` parsers with sample output from Windows
 (English, Chinese, German, French, Russian, IPv6), Linux (iputils and BusyBox)
 and macOS, the route/resolver/interface parsers for the three platforms, the
-Wi-Fi parsers, DNS packet construction, speed-test and iperf3 output, and the
-complete build pipeline (labels, gaps, event join, card update, figures) on a
-synthetic run generated inside the test.
+Wi-Fi parsers, DNS packet construction, speed-test and iperf3 output, the
+handling of failed speed-test latency probes, and the complete build, analysis
+and figure pipeline on a synthetic run generated inside the test.
 
 ## Platform notes
 
@@ -247,7 +395,8 @@ synthetic run generated inside the test.
   provide sub-millisecond latency on every platform. The gateway, interface
   type and resolver are read with PowerShell (`Get-NetRoute`,
   `Get-NetAdapter`, `Get-DnsClientServerAddress`), which works in every
-  display language; `route print` is the fallback.
+  display language; `route print` is the fallback and does not report the
+  media type, which is why the published run has `link_type = unknown`.
 - Linux: `iw` is used for Wi-Fi metrics when present, `/proc/net/wireless`
   otherwise; `resolvectl` is consulted when `/etc/resolv.conf` points to the
   local stub resolver.
@@ -257,17 +406,36 @@ synthetic run generated inside the test.
 
 ## Citation
 
+If you use the source code (the collector, the build pipeline or the
+analysis), cite the software:
+
 ```bibtex
-@dataset{localnet_dynamics_2026,
-  author    = {Aiersilan, Aizierjiang},
-  title     = {LocalNet-Dynamics: A Longitudinal Local Area Network Telemetry Dataset},
-  year      = {2026},
-  version   = {1.0.0},
-  url       = {https://github.com/Ezharjan/LocalNet-Dynamics}
+@software{ezharjan_localnetdynamics_code_2026,
+  author  = {Ezharjan, Alexander},
+  title   = {LocalNet-Dynamics: collector, build pipeline and analysis toolkit for longitudinal home-network telemetry},
+  year    = {2026},
+  version = {1.0.0},
+  url     = {https://github.com/Ezharjan/LocalNetDynamicsDataset}
 }
 ```
 
-See [CITATION.cff](CITATION.cff) for the machine-readable form.
+If you use the data, cite the dataset:
+
+```bibtex
+@dataset{ezharjan_localnetdynamics_data_2026,
+  author    = {Ezharjan, Alexander},
+  title     = {LocalNet-Dynamics: A Longitudinal Local Area Network Telemetry Dataset},
+  year      = {2026},
+  version   = {1.0.0},
+  publisher = {Hugging Face},
+  doi       = {10.57967/hf/10841},
+  url       = {https://huggingface.co/datasets/ezharjan/LocalNetDynamics}
+}
+```
+
+[CITATION.cff](CITATION.cff) holds the machine-readable form of the software
+citation; the dataset's own `CITATION.cff` ships inside the Hugging Face
+repository.
 
 ## License
 
